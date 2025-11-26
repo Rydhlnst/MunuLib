@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Bebas_Neue } from "next/font/google";
 import "./globals.css";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "./api/uploadthing/core";
+import { Toaster } from "@/components/ui/sonner";
 
 // Mengkonfigurasi Plus Jakarta Sans
 // Font ini biasanya bersifat variable, jadi weight seringkali opsional
@@ -33,7 +37,9 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${jakarta.variable} ${bebas.variable} antialiased`}
       >
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         {children}
+        <Toaster/>
       </body>
     </html>
   );

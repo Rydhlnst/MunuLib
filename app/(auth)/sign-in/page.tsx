@@ -3,6 +3,7 @@
 import React from 'react'
 import AuthForm from '../_components/AuthForm'
 import { signInSchema } from '@/lib/validations'
+import { signIn } from '@/lib/actions/auth.action'
 
 const SignInPage = () => {
   return (
@@ -13,7 +14,9 @@ const SignInPage = () => {
             email: "",
             password: "",
         }}
-        onSubmit={() => {}}
+        onSubmit={async (data) => {
+          return await signIn(data); 
+        }}
     />
   )
 }

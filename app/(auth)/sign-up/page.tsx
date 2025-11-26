@@ -3,6 +3,7 @@
 import { signUpSchema } from '@/lib/validations'
 import React from 'react'
 import AuthForm from '../_components/AuthForm'
+import { signUp } from '@/lib/actions/auth.action'
 
 const SignUpPage = () => {
   return (
@@ -17,10 +18,8 @@ const SignUpPage = () => {
             universityCard: "",
         }}
          onSubmit={async (data) => {
-            // TODO: replace with real sign-in logic (API call, auth, etc.)
-            console.log("sign-in data:", data);
-            return { success: true };
-        }}
+            return await signUp(data); 
+          }}
     />
   )
 }

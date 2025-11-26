@@ -35,6 +35,9 @@ import {
 
 import { ZodType } from "zod";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
+import UIpload from "@/components/ImageUpload";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Props<T extends FieldValues> {
   schema: ZodType<T, any, any>;
@@ -51,13 +54,52 @@ const AuthForm = <T extends FieldValues>({
 }: Props<T>) => {
   const isSignIn = type === "SIGN_IN";
 
+  const [loading, setLoading] = React.useState(false);
+  const [serverError, setServerError] = React.useState("");
+
   const form = useForm<T>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues,
+    defaultValues,
   });
 
+  const router = useRouter();
+
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    await onSubmit(data);
+    try {
+      setLoading(true);
+      setServerError("");
+
+      const response = await onSubmit(data);
+
+      if (!response.success) {
+        toast.error(isSignIn ? "Sign In Failed" : "Sign Up Failed", {
+          description: response.error ?? "Something went wrong",
+        });
+
+        setServerError(response.error ?? "Something went wrong");
+        return;
+      }
+
+      toast.success(isSignIn ? "Signed In Successfully" : "Account Created!", {
+        description: isSignIn
+          ? "You're now logged in — welcome back!"
+          : "Your account has been created successfully.",
+      });
+
+      // OPTIONAL redirect here:
+      router.push("/");
+
+    } catch (error: any) {
+      console.error("AuthForm Error:", error);
+
+      toast.error("Unexpected Error", {
+        description: error.message ?? "Something went wrong",
+      });
+
+      setServerError(error.message ?? "Unexpected error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,40 +136,21 @@ const AuthForm = <T extends FieldValues>({
 
                       <FormControl>
                         {key === "universityCard" ? (
-                          // Placeholder UI untuk Upload yang lebih cantik
-                          <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/5 hover:bg-muted/10 transition-colors cursor-pointer group">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              {/* Icon Upload Sederhana */}
-                              <svg
-                                className="w-8 h-8 mb-2 text-muted-foreground group-hover:text-primary transition-colors"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                ></path>
-                              </svg>
-                              <p className="text-xs text-muted-foreground font-medium">
-                                Click to upload ID Card
-                              </p>
-                            </div>
-                            {/* <ImageUpload {...field} /> <-- Pasang komponen aslimu disini nanti */}
-                          </div>
+                          <UIpload
+                            onUploaded={(resp) => field.onChange(resp.url)}
+                          />
                         ) : (
                           <Input
                             required
+                            disabled={loading}
                             type={
                               FIELD_TYPES[key as keyof typeof FIELD_TYPES] ??
                               "text"
                             }
-                            // Style input diperbarui: lebih tinggi, transisi halus, dan shadow tipis
-                            className="h-11 px-4 bg-background shadow-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
-                            placeholder={`Enter your ${key.toLowerCase().replace(/([a-z])([A-Z])/g, '$1 $2')}`}
+                            className="h-11 px-4 bg-background shadow-sm transition-all"
+                            placeholder={`Enter your ${key
+                              .toLowerCase()
+                              .replace(/([a-z])([A-Z])/g, "$1 $2")}`}
                             {...field}
                           />
                         )}
@@ -139,11 +162,24 @@ const AuthForm = <T extends FieldValues>({
                 />
               ))}
 
+              {serverError && (
+                <p className="text-red-500 text-center text-sm -mt-2">
+                  {serverError}
+                </p>
+              )}
+
               <Button
                 type="submit"
+                disabled={loading}
                 className="w-full h-11 mt-4 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
               >
-                {isSignIn ? "Sign In" : "Sign Up"}
+                {loading
+                  ? isSignIn
+                    ? "Signing In..."
+                    : "Creating Account..."
+                  : isSignIn
+                    ? "Sign In"
+                    : "Sign Up"}
               </Button>
             </form>
           </Form>
@@ -156,7 +192,7 @@ const AuthForm = <T extends FieldValues>({
                 Don’t have an account?{" "}
                 <Link
                   href="/sign-up"
-                  className="text-primary font-semibold hover:text-primary/80 transition-colors hover:underline"
+                  className="text-primary font-semibold hover:underline"
                 >
                   Sign up
                 </Link>
@@ -166,7 +202,7 @@ const AuthForm = <T extends FieldValues>({
                 Already have an account?{" "}
                 <Link
                   href="/sign-in"
-                  className="text-primary font-semibold hover:text-primary/80 transition-colors hover:underline"
+                  className="text-primary font-semibold hover:underline"
                 >
                   Sign in
                 </Link>

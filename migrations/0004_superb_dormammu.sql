@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "university_id" SET DATA TYPE bigint;
