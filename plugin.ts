@@ -11,6 +11,8 @@ export const customUserFields = () => {
           universityCard: { type: "string", required: true },
           status: { type: "string", defaultValue: "PENDING" },
           role: { type: "string", defaultValue: "USER" },
+
+          lastActivityDate: { type: "string", required: false },
         },
       },
     },

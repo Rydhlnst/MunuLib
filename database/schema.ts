@@ -6,7 +6,6 @@ import {
   boolean,
   integer,
   index,
-  bigint,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -21,10 +20,11 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   fullName: text("full_name").notNull(),
-  universityId: bigint("university_id", { mode: "number" }).notNull(),
+  universityId: integer("university_id").notNull(),
   universityCard: text("university_card").notNull(),
   status: text("status").default("PENDING"),
   role: text("role").default("USER"),
+  lastActivityDate: text("last_activity_date"),
 });
 
 export const session = pgTable(

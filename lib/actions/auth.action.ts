@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import ratelimit from "@/lib/ratelimit";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { workflowClient } from "../workflows";
+import config from "../config";
 
 export const signUp = async (params: {
   email: string;
@@ -33,6 +35,19 @@ export const signUp = async (params: {
         role: "USER",
       },
     });
+
+    await workflowClient.trigger({
+      url: `${config.env.apiEndpoint}/api/workflows/onboarding`,
+      body: {
+        email,
+        fullName,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      retries: 3, 
+    });
+
 
     return { success: true, data: result };
   } catch (error: any) {
