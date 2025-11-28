@@ -1,7 +1,5 @@
-import Image from "next/image";
 import BookOverview from "./_components/BookOverview";
 import BookList from "./_components/BookList";
-import { sampleBooks } from "@/constants";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
 import db from "@/database/drizzle";
