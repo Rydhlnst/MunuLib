@@ -143,7 +143,9 @@ const AuthForm = <T extends FieldValues>({
                             folder="imageUpload"
                             variant="light"
                             onUploaded={(url) => field.onChange(url)}
+                            value={field.value ?? null}
                           />
+
                         ) : (
                           <Input
                             required

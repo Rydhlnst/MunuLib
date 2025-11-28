@@ -1,4 +1,4 @@
-import { utapi } from "./uploadthing";
+import { utapi } from "./server/utapi";
 
 export const uploadFromUrl = async (url: string, fileName: string) => {
     try {
