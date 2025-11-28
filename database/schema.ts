@@ -8,7 +8,21 @@ import {
   index,
   uuid,
   varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
+
+export const userStatusEnum = pgEnum("user_status", [
+  "PENDING",
+  "VERIFIED",
+  "REJECTED",
+]);
+
+export const userRoleEnum = pgEnum("user_role", [
+  "USER",
+  "ADMIN",
+  "LIBRARIAN",
+  "SUPERADMIN",
+]);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -24,8 +38,8 @@ export const user = pgTable("user", {
   fullName: text("full_name").notNull(),
   universityId: integer("university_id").notNull(),
   universityCard: text("university_card").notNull(),
-  status: text("status").default("PENDING"),
-  role: text("role").default("USER"),
+  status: userStatusEnum("status").default("PENDING"),
+  role: userRoleEnum("role").default("USER"),
   lastActivityDate: text("last_activity_date"),
 });
 
@@ -127,3 +141,21 @@ export const books = pgTable("books", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 })
+
+export const borrowStatusEnum = pgEnum("borrow_status", ["PENDING", "BORROWED", "RETURNED"]);
+
+export const borrowRecords = pgTable("borrow_records", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  bookId: uuid("book_id").notNull().references(() => books.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  dueDate: timestamp("due_date", { withTimezone: true }).notNull(),
+  status: borrowStatusEnum("status").default("PENDING").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  returnDate: timestamp("return_date", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});

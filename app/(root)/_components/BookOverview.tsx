@@ -7,28 +7,47 @@ import Wrapper from "@/components/Wrapper";
 import { Button } from "@/components/ui/button";
 import BookCover from "./BookCover";
 import gsap from "gsap";
+import BorrowBookButton from "./BorrowBookButton";
+import db from "@/database/drizzle";
+import { user } from "@/database/schema";
+import { eq } from "drizzle-orm";
 
-const BookOverview = ({
+interface Props extends Book {
+  userId: string;
+}
+
+const BookOverview = async ({
+  id,
   title,
   author,
   genre,
   rating,
-  total_copies,
-  available_copies,
+  totalCopies,
+  availableCopies,
   description,
-  color,
-  cover,
-}: Book) => {
-  
+  coverColor,
+  coverUrl,
+  userId,
+}: Props) => {
+
+  const [users] = await db.select().from(user).where(eq(user.id, userId)).limit(1);
+
+  if (!users) return null;
+
+  const borrowEligibility = {
+    isEligible: availableCopies > 0 && users.status === "VERIFIED",
+    reason: availableCopies === 0 ? "Book is not available" : "User is not active"
+  }
+
   const mainCoverRef = useRef<HTMLDivElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     if (!mainCoverRef.current) return;
 
-    tlRef.current = gsap.timeline({ 
-      paused: true, 
-      repeat: -1, 
+    tlRef.current = gsap.timeline({
+      paused: true,
+      repeat: -1,
       yoyo: true,
       yoyoEase: "power1.inOut"
     });
@@ -70,13 +89,13 @@ const BookOverview = ({
               <BookCover
                 variant="wide"
                 className="z-10"
-                coverColor={color}
-                coverImage={cover}
+                coverColor={coverColor}
+                coverImage={coverUrl}
               />
             </div>
 
             <div className="absolute left-16 top-10 rotate-12 opacity-60 -z-10 max-lg:hidden">
-              <BookCover variant="wide" coverColor={color} coverImage={cover} />
+              <BookCover variant="wide" coverColor={coverColor} coverImage={coverUrl} />
             </div>
           </div>
         </div>
@@ -98,16 +117,14 @@ const BookOverview = ({
 
           <div className="border border-border rounded-lg p-4 bg-muted/30 flex flex-col gap-2">
             <p className="text-sm">
-              Total Books: <span className="font-semibold text-foreground">{total_copies}</span>
+              Total Books: <span className="font-semibold text-foreground">{totalCopies}</span>
             </p>
             <p className="text-sm">
-              Available Books: <span className="font-semibold text-foreground">{available_copies}</span>
+              Available Books: <span className="font-semibold text-foreground">{availableCopies}</span>
             </p>
           </div>
 
-          <Button size="lg" className="w-fit px-6 font-semibold" disabled={available_copies === 0}>
-            {available_copies > 0 ? "Borrow Book" : "Not Available"}
-          </Button>
+          <BorrowBookButton bookId={id} userId={userId} availableCopies={availableCopies} borrowEligibility={borrowEligibility} />
 
           <p className="text-muted-foreground leading-relaxed text-base">
             {description}

@@ -54,6 +54,7 @@ const BookCover = ({
           width={400}
           height={600}
           className="object-fill rounded-r-sm w-full h-full"
+          loading="lazy"
         />
       </div>
     </div>

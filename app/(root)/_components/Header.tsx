@@ -15,9 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { User2Icon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Header({ user }: {user: any}) {
+export default function Header({ user }: { user: any }) {
   const pathname = usePathname();
 
   const navItems = [
@@ -38,49 +39,62 @@ export default function Header({ user }: {user: any}) {
               <FiSearch className="h-5 w-5" />
             </button>
 
-            <button className="text-muted-foreground hover:text-foreground transition-colors relative">
-              <FiBell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full"></span>
-            </button>
+            {user ? (
+              <>
+                <button className="text-muted-foreground hover:text-foreground transition-colors relative">
+                  <FiBell className="h-5 w-5" />
+                  <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full"></span>
+                </button>
 
-            {/* USER DROPDOWN */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarImage src={user?.image ?? ""} />
-                  <AvatarFallback>
-                    {user?.fullName?.charAt(0).toUpperCase() ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
+                {/* USER DROPDOWN */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="h-8 w-8 cursor-pointer">
+                      <AvatarImage src={user?.image ?? ""} />
+                      <AvatarFallback>
+                        {user?.fullName?.charAt(0).toUpperCase() ?? "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>
-                  {user?.fullName ?? "User"}
-                </DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>
+                      {user?.fullName ?? "User"}
+                    </DropdownMenuLabel>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">
-                    <User2Icon/>
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer">
+                        <User2Icon />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem
-                  className="text-destructive cursor-pointer"
-                  onClick={async () => {
-                    await authClient.signOut();
-                    window.location.href = "/sign-in";
-                  }}
-                >
-                  Log Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <DropdownMenuItem
+                      className="text-destructive cursor-pointer"
+                      onClick={async () => {
+                        await authClient.signOut();
+                        window.location.href = "/sign-in";
+                      }}
+                    >
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href="/sign-up">Sign Up</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
