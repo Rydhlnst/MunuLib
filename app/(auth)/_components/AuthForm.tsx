@@ -140,7 +140,7 @@ const AuthForm = <T extends FieldValues>({
                             type="image"
                             accept="image/*"
                             placeholder="Upload your University ID"
-                            folder="universityIdCard"
+                            folder="imageUpload"
                             variant="light"
                             onUploaded={(url) => field.onChange(url)}
                           />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { FiUploadCloud, FiX, FiRotateCw } from "react-icons/fi";
@@ -14,7 +14,8 @@ interface Props {
   placeholder: string;
   folder: keyof OurFileRouter;
   variant?: "dark" | "light";
-  onUploaded: (url: string) => void;
+  onUploaded: (url: string | null) => void; // UPDATED
+  value?: string | null; // NEW
 }
 
 export default function FileUpload({
@@ -24,6 +25,7 @@ export default function FileUpload({
   folder,
   variant = "light",
   onUploaded,
+  value, // NEW
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +35,16 @@ export default function FileUpload({
   const [uploading, setUploading] = useState(false);
   const [failed, setFailed] = useState(false);
   const [fileToRetry, setFileToRetry] = useState<File | null>(null);
+
+  // 🆕 Sync initial value from form
+  useEffect(() => {
+    if (value) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPreview(value);
+      setFailed(false);
+      setUploading(false);
+    }
+  }, [value]);
 
   const { startUpload } = useUploadThing(folder, {
     onClientUploadComplete: (res) => {
@@ -76,7 +88,7 @@ export default function FileUpload({
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    setPreview(URL.createObjectURL(file)); // Show temp preview
+    setPreview(URL.createObjectURL(file)); // temp preview
     uploadFile(file);
   };
 
@@ -95,13 +107,14 @@ export default function FileUpload({
     setPreview(null);
     setFailed(false);
     setProgress(0);
+    onUploaded(null); // NEW
     toast("File removed");
   };
 
   const isDark = variant === "dark";
 
   // ===========================
-  // PREVIEW AFTER UPLOAD DONE
+  // PREVIEW STATE (success)
   // ===========================
   if (preview && !uploading && !failed) {
     return (
@@ -167,15 +180,15 @@ export default function FileUpload({
   }
 
   // ===========================
-  // UPLOAD BOX
+  // UPLOAD BOX (default)
   // ===========================
   return (
     <div className="flex flex-col gap-2 w-full">
       <div
         className={`border shadow-sm rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition cursor-pointer
-          ${dragOver ? "border-primary bg-primary/10" : "border-muted-foreground/30"}
-          ${isDark ? "bg-card" : "bg-background"}
-        `}
+        ${dragOver ? "border-primary bg-primary/10" : "border-muted-foreground/30"}
+        ${isDark ? "bg-card" : "bg-background"}
+      `}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);

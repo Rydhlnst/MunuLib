@@ -6,6 +6,8 @@ import {
   boolean,
   integer,
   index,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -104,3 +106,24 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const books = pgTable("books", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  author: varchar("author", { length: 255 }).notNull(),
+  genre: text("genre").notNull(),
+  rating: integer("rating").notNull(),
+  totalCopies: integer("total_copies").notNull().default(1),
+  availableCopies: integer("available_copies").notNull().default(0),
+  description: text("description").notNull(),
+  coverColor: varchar("cover_color", { length: 7 }).notNull(),
+  coverUrl: text("cover_url").notNull(),
+  isLoanedBook: boolean("is_loaned_book").notNull().default(false),
+  videoUrl: text("video").notNull(),
+  summary: varchar("summary").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+})

@@ -13,7 +13,7 @@ const UIpload = ({ onUploaded }: { onUploaded: (resp: { url: string }) => void }
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { startUpload, isUploading } =
-    useUploadThing("universityIdCard", {
+    useUploadThing("imageUpload", {
       onClientUploadComplete: (res) => {
         if (res?.[0]?.url) {
           onUploaded({ url: res[0].url });

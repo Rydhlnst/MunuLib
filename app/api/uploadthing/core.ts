@@ -3,19 +3,21 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 const f = createUploadthing();
 
 export const ourFileRouter = {
-  universityIdCard: f({
+  // 📌 IMAGE UPLOAD
+  imageUpload: f({
     image: {
       maxFileSize: "4MB",
       maxFileCount: 1,
     },
   }).onUploadComplete(async ({ file }) => {
-    console.log("University ID uploaded:", file.url);
+    console.log("Image uploaded:", file.url);
     return { url: file.url };
   }),
 
+  // 📌 VIDEO UPLOAD
   videoUpload: f({
     video: {
-      maxFileSize: "1024MB",  
+      maxFileSize: "1024MB",
       maxFileCount: 1,
     },
   }).onUploadComplete(async ({ file }) => {
